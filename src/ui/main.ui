@@ -3,10 +3,42 @@
   <requires lib="gtk" version="4.0"/>
   <object class="AdwToolbarView" id="mainView">
     <child type="top">
-      <object class="AdwHeaderBar"></object>
+      <object class="GtkBox">
+        <property name="orientation">1</property>
+        <child>
+          <object class="AdwHeaderBar">
+            <child>
+              <object class="GtkToggleButton" id="searchBtn">
+                <property name="icon-name">search-symbolic</property>
+                <property name="active" bind-source="searchBar" bind-property="search-mode-enabled" bind-flags="sync-create"/>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSearchBar" id="searchBar">
+            <property name="key-capture-widget">imgGrid</property>
+            <property name="search-mode-enabled" bind-source="searchBtn" bind-property="active" bind-flags="sync-create"/>
+            <child>
+              <object class="GtkSearchEntry" id="searchentry">
+                <property name="search-delay">100</property>
+                <property name="placeholder-text" translatable="true">Search for fruits</property>
+                <property name="width-request">400</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
     </child>
     <property name="content">
-      <object class="GtkGrid" id="imgGrid"></object>
+      <object class="GtkScrolledWindow">
+        <child>
+          <object class="GtkGridView" id="imgGrid">
+            <property name="min-columns">1</property>
+            <property name="max-columns">10</property>
+          </object>
+        </child>
+      </object>
     </property>
   </object>
 </interface>

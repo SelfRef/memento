@@ -3,7 +3,31 @@ using Adw 1;
 
 Adw.ToolbarView mainView {
   [top]
-  Adw.HeaderBar {}
+  Box {
+    orientation: vertical;
 
-  content: Grid imgGrid {};
+    Adw.HeaderBar {
+      ToggleButton searchBtn {
+          icon-name: "search-symbolic";
+          active: bind searchBar.search-mode-enabled;
+      }
+    }
+    SearchBar searchBar {
+      key-capture-widget: imgGrid;
+      search-mode-enabled: bind searchBtn.active;
+
+      SearchEntry searchentry{
+        search-delay: 100;
+        placeholder-text: _("Search for fruits");
+        width-request: 400;
+      }
+    }
+  }
+
+  content: ScrolledWindow {
+    GridView imgGrid {
+      min-columns: 1;
+      max-columns: 10;
+    }
+  };
 }
