@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="AdwToolbarView" id="mainView">
+    <child type="top">
+      <object class="AdwHeaderBar"></object>
+    </child>
+    <property name="content">
+      <object class="GtkGrid" id="imgGrid"></object>
+    </property>
+  </object>
+</interface>

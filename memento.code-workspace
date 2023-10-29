@@ -4,5 +4,44 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Compile UI",
+				"command": "blueprint-compiler",
+				"type": "shell",
+				"options": {
+					"cwd": "src/ui"
+				},
+				"args": [
+					"compile",
+					"--output",
+					"main.ui",
+					"main.blp"
+				],
+				"presentation": {
+					"reveal": "always"
+				},
+				"group": "build"
+			},
+			{
+				"label": "Run main",
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"type": "shell",
+				"options": {
+					"cwd": "src"
+				},
+				"command": "python",
+				"args": [
+					"main.py"
+				],
+				"dependsOn": "Compile UI"
+			}
+		]
+	}
 }

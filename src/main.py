@@ -1,23 +1,15 @@
 import gi, os
-
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gtk
+gi.require_version("Adw", "1")
+from gi.repository import Gtk, Adw
 
 def on_activate(app):
-	builder: Gtk.Builder = Gtk.Builder.new_from_file("./ui/meme-gallery.ui")
-	window: Gtk.Window = builder.get_object('main')
+	builder: Gtk.Builder = Gtk.Builder.new_from_file("./ui/main.ui")
+	view = builder.get_object('mainView')
+	window = Adw.ApplicationWindow(content=view, default_width=800, default_height=600)
 	window.set_application(app)
 	window.present()
 
-	flow: Gtk.FlowBox = builder.get_object('flow')
-
-	for img in os.listdir('./assets'):
-		pic = Gtk.Picture()
-		pic.set_filename(os.path.join('assets', img))
-		flowchild = Gtk.FlowBoxChild()
-		flowchild.set_child(pic)
-		flow.append(flowchild)
-
-app = Gtk.Application(application_id='org.gtk.Example')
+app = Adw.Application(application_id='org.gtk.Example')
 app.connect('activate', on_activate)
 app.run(None)
