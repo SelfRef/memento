@@ -1,33 +1,114 @@
 using Gtk 4.0;
 using Adw 1;
 
-Adw.ToolbarView mainView {
-  [top]
-  Box {
+template $Window : Adw.ApplicationWindow {
+  content: Adw.ToolbarView mainView {
+    [top]
+    Box {
+      orientation: vertical;
+
+      Adw.HeaderBar {
+        Button {
+          clicked => $select_directory();
+          Adw.ButtonContent {
+            icon-name: "folder-symbolic";
+            label: "Open";
+          }
+        }
+        Button {
+          icon-name: "view-refresh-symbolic";
+          clicked => $generate_thumbnails();
+          visible: bind imgGrid.visible;
+        }
+        Button {
+          label: "Scan";
+          clicked => $scan_ocr();
+        }
+        [end]
+        MenuButton button_menu {
+          icon-name: "open-menu-symbolic";
+          primary: true;
+          popover: menuPopover;
+        }
+        [end]
+        ToggleButton searchBtn {
+            icon-name: "search-symbolic";
+            active: bind searchBar.search-mode-enabled bidirectional;
+        }
+      }
+      SearchBar searchBar {
+        key-capture-widget: imgGrid;
+
+        SearchEntry searchentry{
+          search-delay: 100;
+          placeholder-text: _("Search for fruits");
+          width-request: 300;
+        }
+      }
+    }
+
+    content: Stack main_stack {
+      transition-type: crossfade;
+      StackPage {
+        name: 'no_memes';
+        child: Adw.StatusPage noMemesStatus {
+          title: "Where are memes?";
+          description: "Use \"Open\" button to select a folder";
+        };
+      }
+      StackPage {
+        name: 'memes';
+        child: ScrolledWindow {
+          GridView imgGrid {
+            min-columns: 1;
+            max-columns: 10;
+          }
+        };
+      }
+    };
+  };
+}
+
+Popover menuPopover {
+  width-request: 200;
+  child: Box {
     orientation: vertical;
-
-    Adw.HeaderBar {
-      ToggleButton searchBtn {
-          icon-name: "search-symbolic";
-          active: bind searchBar.search-mode-enabled;
-      }
+    Label {
+      label: _("Enlarge you meme");
+      valign: center;
     }
-    SearchBar searchBar {
-      key-capture-widget: imgGrid;
-      search-mode-enabled: bind searchBtn.active;
-
-      SearchEntry searchentry{
-        search-delay: 100;
-        placeholder-text: _("Search for fruits");
-        width-request: 400;
-      }
-    }
-  }
-
-  content: ScrolledWindow {
-    GridView imgGrid {
-      min-columns: 1;
-      max-columns: 10;
+    Scale iconSizeScale {
+      orientation: horizontal;
+      digits: 0;
+      round-digits: 0;
+      adjustment: Adjustment {
+        lower: 1;
+        upper: 5;
+        value: 3;
+      };
+      marks [
+        mark(1, bottom, "smol"),
+        mark(2),
+        mark(3),
+        mark(4),
+        mark(5, bottom, "GIGA"),
+      ]
+      change-value => $change_icon_size();
+      sensitive: bind imgGrid.visible;
     }
   };
+}
+
+menu menu_app {
+  section {
+    item {
+      label: _("Keyboard Shortcuts");
+      action: "app.shortcuts";
+    }
+
+    item {
+      label: _("About My App");
+      action: "app.about";
+    }
+  }
 }
