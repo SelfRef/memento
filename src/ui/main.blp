@@ -12,7 +12,7 @@ template $Window : Adw.ApplicationWindow {
           clicked => $select_directory();
           Adw.ButtonContent {
             icon-name: "folder-symbolic";
-            label: "Open";
+            label: _("Open");
           }
         }
         Button {
@@ -21,8 +21,8 @@ template $Window : Adw.ApplicationWindow {
           visible: bind imgGrid.visible;
         }
         Button {
-          label: "Scan";
-          clicked => $scan_ocr();
+          label: "Test";
+          clicked => $test();
         }
         [end]
         MenuButton button_menu {
@@ -41,29 +41,65 @@ template $Window : Adw.ApplicationWindow {
 
         SearchEntry searchentry{
           search-delay: 100;
-          placeholder-text: _("Search for fruits");
+          placeholder-text: _("Seek greatness");
           width-request: 300;
         }
       }
     }
 
-    content: Stack main_stack {
-      transition-type: crossfade;
-      StackPage {
-        name: 'no_memes';
-        child: Adw.StatusPage noMemesStatus {
-          title: "Where are memes?";
-          description: "Use \"Open\" button to select a folder";
-        };
+    content: Adw.OverlaySplitView overlay_sidebar {
+      collapsed: true;
+      sidebar-position: end;
+
+      Stack main_stack {
+        transition-type: crossfade;
+        StackPage {
+          name: 'no_memes';
+          child: Adw.StatusPage noMemesStatus {
+            title: _("Where are memes?");
+            description: _("Use \"Open\" button to select a folder");
+          };
+        }
+        // StackPage {
+        //   name: 'loading';
+        //   child: Adw.StatusPage {
+        //     title: _("Lold up, magic happens");
+        //     description: _("Just loorking around in you meme folder...");
+        //     Spinner {
+        //       spinning: true;
+        //       width-request: 200;
+        //       height-request: 200;
+        //     }
+        //   };
+        // }
+        StackPage {
+          name: 'loading';
+          child: Adw.StatusPage {
+            title: _("Lold up, magic happens");
+            description: _("Just loorking around in you meme folder...");
+            Adw.Clamp {
+              maximum-size: 300;
+
+              ProgressBar progress {}
+            }
+          };
+        }
+        StackPage {
+          name: 'memes';
+          child: ScrolledWindow {
+            GridView imgGrid {
+              min-columns: 1;
+              max-columns: 10;
+            }
+          };
+        }
       }
-      StackPage {
-        name: 'memes';
-        child: ScrolledWindow {
-          GridView imgGrid {
-            min-columns: 1;
-            max-columns: 10;
-          }
-        };
+
+      [sidebar]
+      Box {
+        Label {
+          label: "kek";
+        }
       }
     };
   };
@@ -86,29 +122,15 @@ Popover menuPopover {
         upper: 5;
         value: 3;
       };
+      change-value => $change_icon_size();
+      sensitive: false;
       marks [
-        mark(1, bottom, "smol"),
+        mark(1, bottom, _("smol")),
         mark(2),
         mark(3),
         mark(4),
-        mark(5, bottom, "GIGA"),
+        mark(5, bottom, _("GIGA")),
       ]
-      change-value => $change_icon_size();
-      sensitive: bind imgGrid.visible;
     }
   };
-}
-
-menu menu_app {
-  section {
-    item {
-      label: _("Keyboard Shortcuts");
-      action: "app.shortcuts";
-    }
-
-    item {
-      label: _("About My App");
-      action: "app.about";
-    }
-  }
 }

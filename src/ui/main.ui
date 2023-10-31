@@ -15,7 +15,7 @@
                     <child>
                       <object class="AdwButtonContent">
                         <property name="icon-name">folder-symbolic</property>
-                        <property name="label">Open</property>
+                        <property name="label" translatable="true">Open</property>
                       </object>
                     </child>
                   </object>
@@ -29,8 +29,8 @@
                 </child>
                 <child>
                   <object class="GtkButton">
-                    <property name="label">Scan</property>
-                    <signal name="clicked" handler="scan_ocr"/>
+                    <property name="label">Test</property>
+                    <signal name="clicked" handler="test"/>
                   </object>
                 </child>
                 <child type="end">
@@ -54,7 +54,7 @@
                 <child>
                   <object class="GtkSearchEntry" id="searchentry">
                     <property name="search-delay">100</property>
-                    <property name="placeholder-text" translatable="true">Search for fruits</property>
+                    <property name="placeholder-text" translatable="true">Seek greatness</property>
                     <property name="width-request">300</property>
                   </object>
                 </child>
@@ -63,32 +63,66 @@
           </object>
         </child>
         <property name="content">
-          <object class="GtkStack" id="main_stack">
-            <property name="transition-type">1</property>
+          <object class="AdwOverlaySplitView" id="overlay_sidebar">
+            <property name="collapsed">true</property>
+            <property name="sidebar-position">1</property>
             <child>
-              <object class="GtkStackPage">
-                <property name="name">no_memes</property>
-                <property name="child">
-                  <object class="AdwStatusPage" id="noMemesStatus">
-                    <property name="title">Where are memes?</property>
-                    <property name="description">Use "Open" button to select a folder</property>
+              <object class="GtkStack" id="main_stack">
+                <property name="transition-type">1</property>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">no_memes</property>
+                    <property name="child">
+                      <object class="AdwStatusPage" id="noMemesStatus">
+                        <property name="title" translatable="true">Where are memes?</property>
+                        <property name="description" translatable="true">Use "Open" button to select a folder</property>
+                      </object>
+                    </property>
                   </object>
-                </property>
+                </child>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">loading</property>
+                    <property name="child">
+                      <object class="AdwStatusPage">
+                        <property name="title" translatable="true">Lold up, magic happens</property>
+                        <property name="description" translatable="true">Just loorking around in you meme folder...</property>
+                        <child>
+                          <object class="AdwClamp">
+                            <property name="maximum-size">300</property>
+                            <child>
+                              <object class="GtkProgressBar" id="progress"></object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">memes</property>
+                    <property name="child">
+                      <object class="GtkScrolledWindow">
+                        <child>
+                          <object class="GtkGridView" id="imgGrid">
+                            <property name="min-columns">1</property>
+                            <property name="max-columns">10</property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
               </object>
             </child>
-            <child>
-              <object class="GtkStackPage">
-                <property name="name">memes</property>
-                <property name="child">
-                  <object class="GtkScrolledWindow">
-                    <child>
-                      <object class="GtkGridView" id="imgGrid">
-                        <property name="min-columns">1</property>
-                        <property name="max-columns">10</property>
-                      </object>
-                    </child>
+            <child type="sidebar">
+              <object class="GtkBox">
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">kek</property>
                   </object>
-                </property>
+                </child>
               </object>
             </child>
           </object>
@@ -119,30 +153,18 @@
                 <property name="value">3</property>
               </object>
             </property>
+            <signal name="change-value" handler="change_icon_size"/>
+            <property name="sensitive">false</property>
             <marks>
-              <mark value="1" position="bottom">smol</mark>
+              <mark value="1" position="bottom" translatable="true">smol</mark>
               <mark value="2"></mark>
               <mark value="3"></mark>
               <mark value="4"></mark>
-              <mark value="5" position="bottom">GIGA</mark>
+              <mark value="5" position="bottom" translatable="true">GIGA</mark>
             </marks>
-            <signal name="change-value" handler="change_icon_size"/>
-            <property name="sensitive" bind-source="imgGrid" bind-property="visible" bind-flags="sync-create"/>
           </object>
         </child>
       </object>
     </property>
   </object>
-  <menu id="menu_app">
-    <section>
-      <item>
-        <attribute name="label" translatable="true">Keyboard Shortcuts</attribute>
-        <attribute name="action">app.shortcuts</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="true">About My App</attribute>
-        <attribute name="action">app.about</attribute>
-      </item>
-    </section>
-  </menu>
 </interface>

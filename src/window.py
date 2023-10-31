@@ -3,8 +3,8 @@ import gi, os
 from PIL import Image
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gio
-from utils.models import GifPaintable, MemeItem
+from gi.repository import Gtk, Adw, Gio, GObject, Gdk, GLib, GdkPixbuf
+from models import GifPaintable, MemeItem, MemeStore
 
 @Gtk.Template(filename='ui/main.ui')
 class Window(Adw.ApplicationWindow):
@@ -13,22 +13,27 @@ class Window(Adw.ApplicationWindow):
 	iconSize: int = 150
 	thumbnailWidgets: List[Gtk.Picture] = []
 	filePaths: List[str] = []
-	model: Gio.ListStore = Gio.ListStore(item_type=MemeItem)
+	store: MemeStore = MemeStore()
 	selected_directory: str
+	default_view: str = 'no_memes'
+	# default_view = 'loading'
 
 	iconSizeScale: Gtk.Scale = Gtk.Template.Child()
 	imgGrid: Gtk.GridView = Gtk.Template.Child()
 	noMemesStatus: Adw.StatusPage = Gtk.Template.Child()
 	main_stack: Gtk.Stack = Gtk.Template.Child()
+	progress: Gtk.ProgressBar = Gtk.Template.Child()
+	overlay_sidebar: Adw.OverlaySplitView = Gtk.Template.Child()
 
 	def __init__(self, app):
 		super().__init__(application=app, default_height=600, default_width=800, title='Memento')
+		self.main_stack.set_visible_child_name(self.default_view)
 		self.present()
 
 		ptbl = GifPaintable('ui/travolta.gif')
 		self.noMemesStatus.set_paintable(ptbl)
 
-		gridModel = Gtk.NoSelection(model=self.model)
+		gridModel = Gtk.NoSelection(model=self.store)
 		gridFactory = Gtk.SignalListItemFactory()
 		gridFactory.connect('setup', self.setup_grid_view_item_factory)
 		gridFactory.connect('bind', self.bind_grid_view_item_factory)
@@ -36,17 +41,14 @@ class Window(Adw.ApplicationWindow):
 		self.imgGrid.set_model(gridModel)
 		self.imgGrid.set_factory(gridFactory)
 
-	def get_list_of_files(self, path: str, types: None | List[str] = None) -> List[str]:
-		file_paths = []
-		for root, dirs, files in os.walk(path):
-			for file in files:
-				file_path = os.path.join(root, file)
-				if (types is None):
-					file_paths.append(file_path)
-				else:
-					if os.path.splitext(file_path)[1] in types:
-						file_paths.append(file_path)
-		return file_paths
+
+	def load_memes(self, dir_path: str):
+		self.main_stack.set_visible_child_name('loading')
+		self.store.load_folder(dir_path, self.memes_loaded, self.progress)
+
+	def memes_loaded(self):
+		self.main_stack.set_visible_child_name('memes')
+		self.iconSizeScale.set_sensitive(True)
 
 	def setup_grid_view_item_factory(self, factory: Gtk.SignalListItemFactory, item: Gtk.ListItem):
 		pic = Gtk.Picture(
@@ -61,10 +63,28 @@ class Window(Adw.ApplicationWindow):
 		item.set_child(pic)
 
 	def bind_grid_view_item_factory(self, factory: Gtk.SignalListItemFactory, item: Gtk.ListItem):
-		pic: Gtk.Picture = item.get_child()
 		modelItem: MemeItem = item.get_item()
-		path = modelItem.path
-		pic.set_filename(path)
+		picture: Gtk.Picture = item.get_child()
+		path = modelItem.thumb_path
+		img: Image.Image = modelItem.image
+		if img is not None:
+			print(f'[I] Loading from memory: "{modelItem.path}')
+			try:
+				pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
+					GLib.Bytes.new(img.tobytes()),
+					GdkPixbuf.Colorspace.RGB,
+					False,
+					8,
+					img.width,
+					img.height,
+					img.width * 3
+				)
+				picture.set_paintable(Gdk.Texture.new_for_pixbuf(pixbuf))
+			except:
+				print(f'[E] Failed loading from memory: "{modelItem.path}')
+		else:
+			print(f'[W] Fallback loading from name: "{modelItem.path}')
+			picture.set_filename(path)
 		#pic.set_filename('ui/test.png')
 
 	@Gtk.Template.Callback()
@@ -77,23 +97,17 @@ class Window(Adw.ApplicationWindow):
 	def generate_thumbnails(self, *_):
 		print('test')
 
-	def load_folder(self):
-		self.filePaths = self.get_list_of_files(self.select_directory, ['.png', '.jpg'])
-		for path in self.filePaths:
-			self.model.append(MemeItem(path))
-		self.main_stack.set_visible_child_name('memes')
-
 	@Gtk.Template.Callback()
 	def select_directory(self, *_):
 		picker = Gtk.FileDialog(title="Select your meme directory")
 
 		def set_selected_directory(dialog: Gtk.FileDialog, result):
 			file: Gio.File = dialog.select_folder_finish(result)
-			self.select_directory = file.get_path()
-			self.load_folder()
+			self.load_memes(file.get_path())
 
 		picker.select_folder(self, callback=set_selected_directory)
 
 	@Gtk.Template.Callback()
-	def scan_ocr(self, *_):
-		pass
+	def test(self, *_):
+		val = self.overlay_sidebar.get_show_sidebar()
+		self.overlay_sidebar.set_show_sidebar(not val)

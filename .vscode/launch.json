@@ -11,7 +11,8 @@
 			"program": "main.py",
 			"cwd": "${workspaceFolder}/src",
 			"console": "integratedTerminal",
-			"justMyCode": true
+			"justMyCode": true,
+			"preLaunchTask": "Compile UI"
 		}
 	]
 }
