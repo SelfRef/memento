@@ -1,7 +1,7 @@
 import json
 from os import path
 
-# This implementation is temporary, will be replaced with GtkSettings
+# TODO: This implementation is temporary, will be replaced with GtkSettings
 class Settings():
 	def __init__(self) -> None:
 		self._dir_path = path.split(__file__)[0]

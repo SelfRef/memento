@@ -52,16 +52,18 @@ template $Window : Adw.ApplicationWindow {
       SearchBar searchBar {
         key-capture-widget: miniatures_grid_view;
 
-        SearchEntry searchentry {
+        SearchEntry search_entry {
           search-delay: 100;
           placeholder-text: _("Seek greatness");
           width-request: 300;
+          changed => $on_search();
         }
       }
     }
 
     content: Stack main_stack {
       transition-type: crossfade;
+      transition-duration: 100;
       StackPage {
         name: 'no_memes';
         child: Adw.StatusPage no_memes_status_page {
@@ -171,6 +173,17 @@ template $Window : Adw.ApplicationWindow {
                     Adw.ActionRow preview_tags_ocr {
                       styles ["property"]
                       title: _("OCR tags");
+
+                      [suffix]
+                      Spinner preview_ocr_spinner {
+                        spinning: false;
+                      }
+                      [suffix]
+                      Button scan_ocr_tags_button {
+                        clicked => $on_preview_ocr_scan();
+                        label: _("Scan image");
+                        styles ["flat"]
+                      }
                     }
                   }
                 }
@@ -179,10 +192,16 @@ template $Window : Adw.ApplicationWindow {
                   valign: end;
 
                   ToggleButton preview_info_button {
-                    icon-name: "info-symbolic";
+                    Adw.ButtonContent {
+                      icon-name: "info-symbolic";
+                      label: _("Info");
+                    }
                   }
                   ToggleButton preview_tags_button {
-                    icon-name: "tag-symbolic";
+                    Adw.ButtonContent {
+                      icon-name: "tag-symbolic";
+                      label: _("Tags");
+                    }
                   }
                 }
               };

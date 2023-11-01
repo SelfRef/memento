@@ -68,10 +68,11 @@
               <object class="GtkSearchBar" id="searchBar">
                 <property name="key-capture-widget">miniatures_grid_view</property>
                 <child>
-                  <object class="GtkSearchEntry" id="searchentry">
+                  <object class="GtkSearchEntry" id="search_entry">
                     <property name="search-delay">100</property>
                     <property name="placeholder-text" translatable="true">Seek greatness</property>
                     <property name="width-request">300</property>
+                    <signal name="changed" handler="on_search"/>
                   </object>
                 </child>
               </object>
@@ -81,6 +82,7 @@
         <property name="content">
           <object class="GtkStack" id="main_stack">
             <property name="transition-type">1</property>
+            <property name="transition-duration">100</property>
             <child>
               <object class="GtkStackPage">
                 <property name="name">no_memes</property>
@@ -228,6 +230,20 @@
                                               <class name="property"/>
                                             </style>
                                             <property name="title" translatable="true">OCR tags</property>
+                                            <child type="suffix">
+                                              <object class="GtkSpinner" id="preview_ocr_spinner">
+                                                <property name="spinning">false</property>
+                                              </object>
+                                            </child>
+                                            <child type="suffix">
+                                              <object class="GtkButton" id="scan_ocr_tags_button">
+                                                <signal name="clicked" handler="on_preview_ocr_scan"/>
+                                                <property name="label" translatable="true">Scan image</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                </style>
+                                              </object>
+                                            </child>
                                           </object>
                                         </child>
                                       </object>
@@ -240,12 +256,22 @@
                                     <property name="valign">2</property>
                                     <child>
                                       <object class="GtkToggleButton" id="preview_info_button">
-                                        <property name="icon-name">info-symbolic</property>
+                                        <child>
+                                          <object class="AdwButtonContent">
+                                            <property name="icon-name">info-symbolic</property>
+                                            <property name="label" translatable="true">Info</property>
+                                          </object>
+                                        </child>
                                       </object>
                                     </child>
                                     <child>
                                       <object class="GtkToggleButton" id="preview_tags_button">
-                                        <property name="icon-name">tag-symbolic</property>
+                                        <child>
+                                          <object class="AdwButtonContent">
+                                            <property name="icon-name">tag-symbolic</property>
+                                            <property name="label" translatable="true">Tags</property>
+                                          </object>
+                                        </child>
                                       </object>
                                     </child>
                                   </object>

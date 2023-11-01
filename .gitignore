@@ -1,4 +1,6 @@
 __pycache__/
 .cache/
+.venv/
+assets/example-memes
 src/test.py
 settings.json
