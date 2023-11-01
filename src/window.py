@@ -5,7 +5,7 @@ from PIL import Image
 from utils import scan_ocr_image
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gio, GObject, Gdk, GLib, GdkPixbuf
+from gi.repository import Gtk, Adw, Gio, Gdk, GLib, GdkPixbuf
 from models import GifPaintable, MemeFilter, MemeItem, MemeStore, ViewEnum
 from settings import Settings
 
@@ -35,6 +35,7 @@ class Window(Adw.ApplicationWindow):
 	preview_ocr_spinner: Gtk.Spinner = Gtk.Template.Child()
 
 	search_entry: Gtk.SearchEntry = Gtk.Template.Child()
+	search_bar: Gtk.SearchBar = Gtk.Template.Child()
 
 	def __init__(self, app, settings: Settings):
 		super().__init__(
@@ -89,6 +90,7 @@ class Window(Adw.ApplicationWindow):
 		pic = Gdk.Texture.new_from_filename(self.selected_item.path)
 		self.overlay_picture.set_paintable(pic)
 		self.set_preview_info()
+		self.set_preview_tags()
 
 		# FIXME: This is a workaround for getting scrollable image that's always 100% of parent width
 		# Maybe there's a better solution in GTK I haven't found yet
@@ -105,18 +107,19 @@ class Window(Adw.ApplicationWindow):
 		width, height = self.selected_item.size
 		self.preview_info_size.set_subtitle(f'{width}px x {height}px')
 
+	def set_preview_tags(self):
+		tags = self.selected_item.tags
+		self.preview_tags_ocr.set_subtitle(', '.join(tags))
+
 	def load_memes(self, dir_path: str):
+		self.on_search_clear()
+		self.grid_selection_model.unselect_all()
 		self.change_stack_view(ViewEnum.Loading)
-		# NOTE: Seems like GTK behaves more reliable when model is set not set during appending
-		# self.store = MemeStore()
-		# self.filter_model.set_model(self.store)
 		self.store.load_folder(dir_path, self.memes_loaded, self.update_progress)
 		self.settings.last_meme_directory = dir_path
 
 	def memes_loaded(self):
-		print('memes loaded')
 		self.change_stack_view(ViewEnum.Memes)
-		print('stack changed')
 
 	def setup_grid_view_item_factory(self, factory: Gtk.SignalListItemFactory, item: Gtk.ListItem):
 		pic = Gtk.Picture(
@@ -193,7 +196,7 @@ class Window(Adw.ApplicationWindow):
 		item.image.info['tags'] = tags
 		self.preview_ocr_spinner.set_spinning(False)
 		self.scan_ocr_tags_button.set_sensitive(True)
-		print('end ocr')
+		self.set_preview_tags()
 
 	@Gtk.Template.Callback()
 	def change_icon_size(self, scale: Gtk.Scale, *_):
@@ -202,15 +205,13 @@ class Window(Adw.ApplicationWindow):
 			pic.set_size_request(iconSize, iconSize)
 
 	@Gtk.Template.Callback()
-	def generate_thumbnails(self, *_):
-		print('test')
-
-	@Gtk.Template.Callback()
 	def on_search(self, *_):
 		search_str = self.search_entry.get_text()
-		print(search_str)
 		self.filter.search(search_str)
 
+	def on_search_clear(self, *_):
+		self.search_entry.set_text('')
+		self.search_bar.set_search_mode(False)
 
 	@Gtk.Template.Callback()
 	def select_directory(self, *_):
@@ -225,8 +226,3 @@ class Window(Adw.ApplicationWindow):
 				pass
 
 		picker.select_folder(self, callback=set_selected_directory)
-
-	@Gtk.Template.Callback()
-	def test(self, *_):
-		val = self.overlay_sidebar.get_show_sidebar()
-		self.overlay_sidebar.set_show_sidebar(not val)

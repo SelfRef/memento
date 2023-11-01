@@ -9,7 +9,7 @@ template $Window : Adw.ApplicationWindow {
       overlay_sidebar.collapsed: true;
     }
   }
-  content: Adw.ToolbarView mainView {
+  content: Adw.ToolbarView main_view {
     [top]
     Box {
       orientation: vertical;
@@ -21,15 +21,6 @@ template $Window : Adw.ApplicationWindow {
             icon-name: "folder-symbolic";
             label: _("Open");
           }
-        }
-        Button {
-          icon-name: "view-refresh-symbolic";
-          clicked => $generate_thumbnails();
-          visible: bind miniatures_grid_view.visible;
-        }
-        Button {
-          label: "Test";
-          clicked => $test();
         }
         [end]
         ToggleButton button_preview_hide {
@@ -46,11 +37,11 @@ template $Window : Adw.ApplicationWindow {
         [end]
         ToggleButton searchBtn {
           icon-name: "search-symbolic";
-          active: bind searchBar.search-mode-enabled bidirectional;
+          active: bind search_bar.search-mode-enabled bidirectional;
         }
       }
-      SearchBar searchBar {
-        key-capture-widget: miniatures_grid_view;
+      SearchBar search_bar {
+        key-capture-widget: main_view;
 
         SearchEntry search_entry {
           search-delay: 100;

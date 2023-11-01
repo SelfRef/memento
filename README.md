@@ -8,7 +8,9 @@ Meme gallery and auto-tagger
 - GTK 4
 - libadwaita
 - Python 3
-- easyocr (PyPI)
+- pillow (PyPI, required)
+- unidecode (PyPI, requred)
+- easyocr (PyPI, optional)
 
 ## Setup
 - Install requirements

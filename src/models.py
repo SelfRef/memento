@@ -7,7 +7,6 @@ from threading import Thread
 import time
 from typing import Callable, List, Optional
 from gi.repository import GLib, Gdk, GdkPixbuf, GObject, Gio, Gtk
-from gi.repository.Gtk import Expression, StringFilterMatchMode
 from utils import get_list_of_files
 from PIL import Image, UnidentifiedImageError
 import json
@@ -88,7 +87,7 @@ class MemeStore(Gio.ListStore):
 
 	def add_metadata(self, image_path: str, img: Image.Image):
 		dir, filename = path.split(image_path)
-		meta_path = path.join(dir, '.cache', filename, '.json')
+		meta_path = path.join(dir, '.cache', filename + '.json')
 		if path.exists(meta_path):
 			try:
 				with open(meta_path, 'r') as file:
@@ -173,6 +172,10 @@ class MemeFilter(Gtk.CustomFilter):
 
 	def search(self, search_string: str):
 		self._search_str = search_string
+		self.emit('changed', Gtk.FilterChange.DIFFERENT)
+
+	def search_clear(self):
+		self._search_str = None
 		self.emit('changed', Gtk.FilterChange.DIFFERENT)
 
 class ViewEnum(Enum):

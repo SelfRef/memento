@@ -12,7 +12,7 @@
       </object>
     </child>
     <property name="content">
-      <object class="AdwToolbarView" id="mainView">
+      <object class="AdwToolbarView" id="main_view">
         <child type="top">
           <object class="GtkBox">
             <property name="orientation">1</property>
@@ -27,19 +27,6 @@
                         <property name="label" translatable="true">Open</property>
                       </object>
                     </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkButton">
-                    <property name="icon-name">view-refresh-symbolic</property>
-                    <signal name="clicked" handler="generate_thumbnails"/>
-                    <property name="visible" bind-source="miniatures_grid_view" bind-property="visible" bind-flags="sync-create"/>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkButton">
-                    <property name="label">Test</property>
-                    <signal name="clicked" handler="test"/>
                   </object>
                 </child>
                 <child type="end">
@@ -59,14 +46,14 @@
                 <child type="end">
                   <object class="GtkToggleButton" id="searchBtn">
                     <property name="icon-name">search-symbolic</property>
-                    <property name="active" bind-source="searchBar" bind-property="search-mode-enabled" bind-flags="sync-create|bidirectional"/>
+                    <property name="active" bind-source="search_bar" bind-property="search-mode-enabled" bind-flags="sync-create|bidirectional"/>
                   </object>
                 </child>
               </object>
             </child>
             <child>
-              <object class="GtkSearchBar" id="searchBar">
-                <property name="key-capture-widget">miniatures_grid_view</property>
+              <object class="GtkSearchBar" id="search_bar">
+                <property name="key-capture-widget">main_view</property>
                 <child>
                   <object class="GtkSearchEntry" id="search_entry">
                     <property name="search-delay">100</property>
