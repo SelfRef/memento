@@ -2,6 +2,15 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="Window" parent="AdwApplicationWindow">
+    <style>
+      <class name="devel"/>
+    </style>
+    <child>
+      <object class="AdwBreakpoint">
+        <condition>max-width: 1000sp</condition>
+        <setter object="overlay_sidebar" property="collapsed">true</setter>
+      </object>
+    </child>
     <property name="content">
       <object class="AdwToolbarView" id="mainView">
         <child type="top">
@@ -24,7 +33,7 @@
                   <object class="GtkButton">
                     <property name="icon-name">view-refresh-symbolic</property>
                     <signal name="clicked" handler="generate_thumbnails"/>
-                    <property name="visible" bind-source="imgGrid" bind-property="visible" bind-flags="sync-create"/>
+                    <property name="visible" bind-source="miniatures_grid_view" bind-property="visible" bind-flags="sync-create"/>
                   </object>
                 </child>
                 <child>
@@ -34,10 +43,17 @@
                   </object>
                 </child>
                 <child type="end">
+                  <object class="GtkToggleButton" id="button_preview_hide">
+                    <property name="icon-name">view-sidebar-end-symbolic</property>
+                    <property name="active" bind-source="overlay_sidebar" bind-property="show-sidebar" bind-flags="sync-create"/>
+                    <property name="visible">false</property>
+                  </object>
+                </child>
+                <child type="end">
                   <object class="GtkMenuButton" id="button_menu">
                     <property name="icon-name">open-menu-symbolic</property>
                     <property name="primary">true</property>
-                    <property name="popover">menuPopover</property>
+                    <property name="popover">main_menu_popover</property>
                   </object>
                 </child>
                 <child type="end">
@@ -50,7 +66,7 @@
             </child>
             <child>
               <object class="GtkSearchBar" id="searchBar">
-                <property name="key-capture-widget">imgGrid</property>
+                <property name="key-capture-widget">miniatures_grid_view</property>
                 <child>
                   <object class="GtkSearchEntry" id="searchentry">
                     <property name="search-delay">100</property>
@@ -63,66 +79,185 @@
           </object>
         </child>
         <property name="content">
-          <object class="AdwOverlaySplitView" id="overlay_sidebar">
-            <property name="collapsed">true</property>
-            <property name="sidebar-position">1</property>
+          <object class="GtkStack" id="main_stack">
+            <property name="transition-type">1</property>
             <child>
-              <object class="GtkStack" id="main_stack">
-                <property name="transition-type">1</property>
-                <child>
-                  <object class="GtkStackPage">
-                    <property name="name">no_memes</property>
-                    <property name="child">
-                      <object class="AdwStatusPage" id="noMemesStatus">
-                        <property name="title" translatable="true">Where are memes?</property>
-                        <property name="description" translatable="true">Use "Open" button to select a folder</property>
-                      </object>
-                    </property>
+              <object class="GtkStackPage">
+                <property name="name">no_memes</property>
+                <property name="child">
+                  <object class="AdwStatusPage" id="no_memes_status_page">
+                    <property name="title" translatable="true">Where are memes?</property>
+                    <property name="description" translatable="true">Use "Open" button to select a folder</property>
                   </object>
-                </child>
-                <child>
-                  <object class="GtkStackPage">
-                    <property name="name">loading</property>
-                    <property name="child">
-                      <object class="AdwStatusPage">
-                        <property name="title" translatable="true">Lold up, magic happens</property>
-                        <property name="description" translatable="true">Just loorking around in you meme folder...</property>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">loading</property>
+                <property name="child">
+                  <object class="AdwStatusPage">
+                    <property name="title" translatable="true">Lold up, magic happens</property>
+                    <property name="description" translatable="true">Just loorking around in you meme folder...</property>
+                    <child>
+                      <object class="AdwClamp">
+                        <property name="maximum-size">300</property>
                         <child>
-                          <object class="AdwClamp">
-                            <property name="maximum-size">300</property>
-                            <child>
-                              <object class="GtkProgressBar" id="progress"></object>
-                            </child>
-                          </object>
+                          <object class="GtkProgressBar" id="progress_bar"></object>
                         </child>
                       </object>
-                    </property>
+                    </child>
                   </object>
-                </child>
-                <child>
-                  <object class="GtkStackPage">
-                    <property name="name">memes</property>
-                    <property name="child">
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">memes</property>
+                <property name="child">
+                  <object class="AdwOverlaySplitView" id="overlay_sidebar">
+                    <property name="collapsed">false</property>
+                    <property name="sidebar-position">1</property>
+                    <property name="min-sidebar-width">500</property>
+                    <property name="max-sidebar-width">500</property>
+                    <property name="show-sidebar" bind-source="button_preview_hide" bind-property="active" bind-flags="sync-create"/>
+                    <child>
                       <object class="GtkScrolledWindow">
                         <child>
-                          <object class="GtkGridView" id="imgGrid">
+                          <object class="GtkGridView" id="miniatures_grid_view">
                             <property name="min-columns">1</property>
                             <property name="max-columns">10</property>
                           </object>
                         </child>
                       </object>
-                    </property>
+                    </child>
+                    <child type="sidebar">
+                      <object class="GtkStack" id="preview_stack">
+                        <property name="transition-type">1</property>
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">no_selection</property>
+                            <property name="child">
+                              <object class="AdwStatusPage" id="noPreviewStatus">
+                                <property name="icon-name">adw-tab-icon-missing-symbolic</property>
+                                <property name="title" translatable="true">Select to preview</property>
+                                <property name="description" translatable="true">Looking at the void may it make look at you</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">preview</property>
+                            <property name="child">
+                              <object class="GtkBox">
+                                <property name="orientation">1</property>
+                                <child>
+                                  <object class="GtkScrolledWindow">
+                                    <child>
+                                      <object class="GtkPicture" id="overlay_picture">
+                                        <style>
+                                          <class name="preview-image"/>
+                                        </style>
+                                        <property name="vexpand">true</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkRevealer" id="revealer_preview_info">
+                                    <property name="transition-duration">300</property>
+                                    <property name="transition-type">4</property>
+                                    <property name="reveal-child" bind-source="preview_info_button" bind-property="active" bind-flags="sync-create"/>
+                                    <child>
+                                      <object class="GtkListBox">
+                                        <property name="selection-mode">0</property>
+                                        <style>
+                                          <class name="boxed-list"/>
+                                        </style>
+                                        <property name="margin-start">20</property>
+                                        <property name="margin-end">20</property>
+                                        <property name="margin-top">20</property>
+                                        <property name="margin-bottom">20</property>
+                                        <child>
+                                          <object class="AdwActionRow" id="preview_info_filename">
+                                            <style>
+                                              <class name="property"/>
+                                            </style>
+                                            <property name="title" translatable="true">File name</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="AdwActionRow" id="preview_info_size">
+                                            <style>
+                                              <class name="property"/>
+                                            </style>
+                                            <property name="title" translatable="true">Image size</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="AdwActionRow" id="preview_info_weight">
+                                            <style>
+                                              <class name="property"/>
+                                            </style>
+                                            <property name="title" translatable="true">File weight</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkRevealer" id="revealer_preview_tags">
+                                    <property name="transition-duration">300</property>
+                                    <property name="transition-type">4</property>
+                                    <property name="reveal-child" bind-source="preview_tags_button" bind-property="active" bind-flags="sync-create"/>
+                                    <child>
+                                      <object class="GtkListBox">
+                                        <property name="selection-mode">0</property>
+                                        <style>
+                                          <class name="boxed-list"/>
+                                        </style>
+                                        <property name="margin-start">20</property>
+                                        <property name="margin-end">20</property>
+                                        <property name="margin-top">20</property>
+                                        <property name="margin-bottom">20</property>
+                                        <child>
+                                          <object class="AdwActionRow" id="preview_tags_ocr">
+                                            <style>
+                                              <class name="property"/>
+                                            </style>
+                                            <property name="title" translatable="true">OCR tags</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkActionBar" id="preview_action_bar">
+                                    <property name="revealed">true</property>
+                                    <property name="valign">2</property>
+                                    <child>
+                                      <object class="GtkToggleButton" id="preview_info_button">
+                                        <property name="icon-name">info-symbolic</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkToggleButton" id="preview_tags_button">
+                                        <property name="icon-name">tag-symbolic</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
-                </child>
-              </object>
-            </child>
-            <child type="sidebar">
-              <object class="GtkBox">
-                <child>
-                  <object class="GtkLabel">
-                    <property name="label">kek</property>
-                  </object>
-                </child>
+                </property>
               </object>
             </child>
           </object>
@@ -130,7 +265,7 @@
       </object>
     </property>
   </template>
-  <object class="GtkPopover" id="menuPopover">
+  <object class="GtkPopover" id="main_menu_popover">
     <property name="width-request">200</property>
     <property name="child">
       <object class="GtkBox">
@@ -142,7 +277,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkScale" id="iconSizeScale">
+          <object class="GtkScale" id="icon_size_scale">
             <property name="orientation">0</property>
             <property name="digits">0</property>
             <property name="round-digits">0</property>

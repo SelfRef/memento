@@ -2,6 +2,13 @@ using Gtk 4.0;
 using Adw 1;
 
 template $Window : Adw.ApplicationWindow {
+  styles ["devel"]
+  Adw.Breakpoint {
+    condition ("max-width: 1000sp")
+    setters {
+      overlay_sidebar.collapsed: true;
+    }
+  }
   content: Adw.ToolbarView mainView {
     [top]
     Box {
@@ -18,28 +25,34 @@ template $Window : Adw.ApplicationWindow {
         Button {
           icon-name: "view-refresh-symbolic";
           clicked => $generate_thumbnails();
-          visible: bind imgGrid.visible;
+          visible: bind miniatures_grid_view.visible;
         }
         Button {
           label: "Test";
           clicked => $test();
         }
         [end]
+        ToggleButton button_preview_hide {
+          icon-name: "view-sidebar-end-symbolic";
+          active: bind overlay_sidebar.show-sidebar;
+          visible: false;
+        }
+        [end]
         MenuButton button_menu {
           icon-name: "open-menu-symbolic";
           primary: true;
-          popover: menuPopover;
+          popover: main_menu_popover;
         }
         [end]
         ToggleButton searchBtn {
-            icon-name: "search-symbolic";
-            active: bind searchBar.search-mode-enabled bidirectional;
+          icon-name: "search-symbolic";
+          active: bind searchBar.search-mode-enabled bidirectional;
         }
       }
       SearchBar searchBar {
-        key-capture-widget: imgGrid;
+        key-capture-widget: miniatures_grid_view;
 
-        SearchEntry searchentry{
+        SearchEntry searchentry {
           search-delay: 100;
           placeholder-text: _("Seek greatness");
           width-request: 300;
@@ -47,65 +60,141 @@ template $Window : Adw.ApplicationWindow {
       }
     }
 
-    content: Adw.OverlaySplitView overlay_sidebar {
-      collapsed: true;
-      sidebar-position: end;
+    content: Stack main_stack {
+      transition-type: crossfade;
+      StackPage {
+        name: 'no_memes';
+        child: Adw.StatusPage no_memes_status_page {
+          title: _("Where are memes?");
+          description: _("Use \"Open\" button to select a folder");
+        };
+      }
+      // StackPage {
+      //   name: 'loading';
+      //   child: Adw.StatusPage {
+      //     title: _("Lold up, magic happens");
+      //     description: _("Just loorking around in you meme folder...");
+      //     Spinner {
+      //       spinning: true;
+      //       width-request: 200;
+      //       height-request: 200;
+      //     }
+      //   };
+      // }
+      StackPage {
+        name: 'loading';
+        child: Adw.StatusPage {
+          title: _("Lold up, magic happens");
+          description: _("Just loorking around in you meme folder...");
+          Adw.Clamp {
+            maximum-size: 300;
 
-      Stack main_stack {
-        transition-type: crossfade;
-        StackPage {
-          name: 'no_memes';
-          child: Adw.StatusPage noMemesStatus {
-            title: _("Where are memes?");
-            description: _("Use \"Open\" button to select a folder");
-          };
-        }
-        // StackPage {
-        //   name: 'loading';
-        //   child: Adw.StatusPage {
-        //     title: _("Lold up, magic happens");
-        //     description: _("Just loorking around in you meme folder...");
-        //     Spinner {
-        //       spinning: true;
-        //       width-request: 200;
-        //       height-request: 200;
-        //     }
-        //   };
-        // }
-        StackPage {
-          name: 'loading';
-          child: Adw.StatusPage {
-            title: _("Lold up, magic happens");
-            description: _("Just loorking around in you meme folder...");
-            Adw.Clamp {
-              maximum-size: 300;
+            ProgressBar progress_bar {}
+          }
+        };
+      }
+      StackPage {
+        name: 'memes';
+        child: Adw.OverlaySplitView overlay_sidebar {
+          collapsed: false;
+          sidebar-position: end;
+          min-sidebar-width: 500;
+          max-sidebar-width: 500;
+          show-sidebar: bind button_preview_hide.active;
 
-              ProgressBar progress {}
-            }
-          };
-        }
-        StackPage {
-          name: 'memes';
-          child: ScrolledWindow {
-            GridView imgGrid {
+          ScrolledWindow {
+            GridView miniatures_grid_view {
               min-columns: 1;
               max-columns: 10;
             }
-          };
-        }
-      }
+          }
 
-      [sidebar]
-      Box {
-        Label {
-          label: "kek";
-        }
+          [sidebar]
+          Stack preview_stack {
+            transition-type: crossfade;
+            StackPage {
+              name: 'no_selection';
+              child: Adw.StatusPage noPreviewStatus {
+                icon-name: "adw-tab-icon-missing-symbolic";
+                title: _("Select to preview");
+                description: _("Looking at the void may it make look at you");
+              };
+            }
+            StackPage {
+              name: 'preview';
+              child: Box {
+                orientation: vertical;
+                ScrolledWindow {
+                  Picture overlay_picture {
+                    styles [ "preview-image" ]
+                    vexpand: true;
+                  }
+                }
+                Revealer revealer_preview_info {
+                  transition-duration: 300;
+                  // https://docs.gtk.org/gtk4/enum.RevealerTransitionType.html
+                  transition-type: slide_up;
+                  reveal-child: bind preview_info_button.active;
+                  ListBox {
+                    selection-mode: none;
+                    styles ["boxed-list"]
+                    margin-start: 20;
+                    margin-end: 20;
+                    margin-top: 20;
+                    margin-bottom: 20;
+                    Adw.ActionRow preview_info_filename {
+                      styles ["property"]
+                      title: _("File name");
+                    }
+                    Adw.ActionRow preview_info_size {
+                      styles ["property"]
+                      title: _("Image size");
+                    }
+                    Adw.ActionRow preview_info_weight {
+                      styles ["property"]
+                      title: _("File weight");
+                    }
+                  }
+                }
+                Revealer revealer_preview_tags {
+                  transition-duration: 300;
+                  // https://docs.gtk.org/gtk4/enum.RevealerTransitionType.html
+                  transition-type: slide_up;
+                  reveal-child: bind preview_tags_button.active;
+                  ListBox {
+                    selection-mode: none;
+                    styles ["boxed-list"]
+                    margin-start: 20;
+                    margin-end: 20;
+                    margin-top: 20;
+                    margin-bottom: 20;
+                    Adw.ActionRow preview_tags_ocr {
+                      styles ["property"]
+                      title: _("OCR tags");
+                    }
+                  }
+                }
+                ActionBar preview_action_bar {
+                  revealed: true;
+                  valign: end;
+
+                  ToggleButton preview_info_button {
+                    icon-name: "info-symbolic";
+                  }
+                  ToggleButton preview_tags_button {
+                    icon-name: "tag-symbolic";
+                  }
+                }
+              };
+            }
+          }
+        };
       }
     };
   };
 }
 
-Popover menuPopover {
+Popover main_menu_popover {
   width-request: 200;
   child: Box {
     orientation: vertical;
@@ -113,7 +202,8 @@ Popover menuPopover {
       label: _("Enlarge you meme");
       valign: center;
     }
-    Scale iconSizeScale {
+    Scale icon_size_scale {
+
       orientation: horizontal;
       digits: 0;
       round-digits: 0;

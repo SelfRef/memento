@@ -1,12 +1,15 @@
 from concurrent.futures import ThreadPoolExecutor
+from enum import Enum
 from os import path, mkdir
 from pickletools import optimize
 from queue import Empty, Queue
 from threading import Thread
+import time
 from typing import Callable, List
 from gi.repository import GLib, Gdk, GdkPixbuf, GObject, Gio, Gtk
 from utils import get_list_of_files
 from PIL import Image
+import json
 
 class MemeStore(Gio.ListStore):
 	def __init__(self):
@@ -17,33 +20,39 @@ class MemeStore(Gio.ListStore):
 		td = Thread(target=self.loading_folder, args=(dir_path, callback, progress))
 		td.start()
 
-	def loading_folder(self, dir_path: str, callback: Callable[[], None], progress: Gtk.ProgressBar):
+	def loading_folder(self, dir_path: str, callback: Callable[[], None], progress: Callable[[], None]):
 		filePaths = get_list_of_files(dir_path, ['.png', '.jpg'])
 		self.create_meme_items(filePaths, progress)
 		callback()
 
-	def create_meme_items(self, filePaths: List[str], progress: Gtk.ProgressBar):
+	def create_meme_items(self, filePaths: List[str], progress: Callable[[], None]):
 		all_len = len(filePaths)
-		for index, path in enumerate(filePaths):
-			thumbPath, img = self.generate_thumbnail(path)
-			self.append(MemeItem(path, thumbPath, img))
-			progress.set_fraction(index/all_len)
-		# Thread(target=self.save_thumbnail_queue).start()
 
-	def generate_thumbnail(self, itemPath: str) -> (str, Image.Image):
-		dir, filename = path.split(itemPath)
-		thumbPath = path.join(dir, '.thumbnails', filename + '.cache')
+		for index, path in enumerate(filePaths):
+			img = self.generate_thumbnail(path)
+			self.append(MemeItem(path, img))
+			progress(index/all_len)
+		print('[I] End of creating items')
+		Thread(target=self.save_thumbnail_queue, daemon=True).start()
+
+	def generate_thumbnail(self, image_path: str) -> (str, Image.Image):
+		dir, filename = path.split(image_path)
+		weight = path.getsize(image_path)
+		thumb_path = path.join(dir, '.cache', filename + '.thumb')
+		metaPath = path.join(dir, '.cache', filename + '.json')
 
 		img: Image.Image = None
-		if path.exists(thumbPath):
-			print(f'[I] Thumbnail already generated for "{itemPath}"')
-			img = Image.open(thumbPath)
+		if path.exists(thumb_path):
+			print(f'[I] Thumbnail already generated for "{image_path}"')
+			img = Image.open(thumb_path)
 		else:
-			img = Image.open(itemPath)
+			img = Image.open(image_path)
 			img.thumbnail((200, 200))
 			img = img.convert('RGB')
-			self.savingQueue.put((img, thumbPath))
-		return (thumbPath, img)
+			self.savingQueue.put((img, thumb_path))
+		img.info['weight'] = weight
+		img.info['thumb_path'] = thumb_path
+		return img
 
 	def save_thumbnail_queue(self):
 		while True:
@@ -53,7 +62,7 @@ class MemeStore(Gio.ListStore):
 				continue
 			else:
 				try:
-					thumbDir = path.join(dir, '.thumbnails')
+					thumbDir = path.split(thumbPath)[0]
 					if not path.exists(thumbDir):
 						mkdir(thumbDir)
 					img.save(thumbPath, 'JPEG', optimize=True)
@@ -62,11 +71,11 @@ class MemeStore(Gio.ListStore):
 					self.savingQueue.task_done()
 
 class MemeItem(GObject.Object):
-	def __init__(self, path: str, thumbPath: str, image: Image) -> None:
+	def __init__(self, path: str, image: Image.Image) -> None:
 		super().__init__()
 		self._path: str = path
-		self._thumb_path: str = thumbPath
-		self._image: Image = image
+		self._image: Image.Image = image
+		self._thumb_path: str = image.info['thumb_path']
 
 	@GObject.Property(type=str)
 	def path(self):
@@ -77,13 +86,34 @@ class MemeItem(GObject.Object):
 		return self._thumb_path
 
 	@property
-	def image(self):
+	def filename(self) -> str:
+		return path.split(self._path)[1]
+
+	@property
+	def image(self) -> Image.Image:
 		return self._image
+
+	@property
+	def weight(self) -> int:
+		return self._image.info['weight']
+
+	@property
+	def size(self) -> (int, int):
+		return self._image.size
+
+	@property
+	def format(self) -> str:
+		return self._image.format
 
 	@thumb_path.setter
 	def thumb_path(self, value):
 		self._thumb_path = value
 		self.notify('thumb_path')
+
+class ViewEnum(Enum):
+	NoMemes = 'no_memes'
+	Memes = 'memes'
+	Loading = 'loading'
 
 class GifPaintable(GObject.Object, Gdk.Paintable):
 	'''Version of Paintable that works with GIFs.\n
