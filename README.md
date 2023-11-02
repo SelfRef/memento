@@ -3,12 +3,14 @@
 
 Meme browser, search and tagger
 
+## Demo
+[demo.webm](https://github.com/SelfRef/memento/assets/69125050/2e6b779f-91ea-4a8d-8982-8dbe896568ea)
+
+## Screenshots
 List | Preview
 ---|---
 ![list](assets/screenshots/grid.png) | ![preview](assets/screenshots/preview.png)
 
-## Demo
-[demo.webm](https://github.com/SelfRef/memento/assets/69125050/2e6b779f-91ea-4a8d-8982-8dbe896568ea)
 
 ## Features (incomplete)
 - Browse your meme folder recursively
