@@ -126,14 +126,6 @@ class MemeItem(GObject.Object):
 		return self._image.info['weight']
 
 	@property
-	def size(self) -> (int, int):
-		return self._image.size
-
-	@property
-	def format(self) -> str:
-		return self._image.format
-
-	@property
 	def tags(self) -> List[str]:
 		return self._image.info.get('tags', [])
 

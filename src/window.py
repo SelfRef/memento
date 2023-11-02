@@ -37,7 +37,7 @@ class Window(Adw.ApplicationWindow):
 	search_entry: Gtk.SearchEntry = Gtk.Template.Child()
 	search_bar: Gtk.SearchBar = Gtk.Template.Child()
 
-	def __init__(self, app, settings: Settings):
+	def __init__(self, app: Adw.Application, settings: Settings):
 		super().__init__(
 			application=app,
 			default_height=800,
@@ -50,6 +50,7 @@ class Window(Adw.ApplicationWindow):
 		self.preview_width = 500
 		self.icon_size: int = 150
 		self.selected_item: MemeItem | None = None
+		self.selected_item_pic: Gdk.Texture | None = None
 		self.thumbnailWidgets: List[Gtk.Picture] = []
 		self.filePaths: List[str] = []
 		self.store: MemeStore = None
@@ -60,12 +61,29 @@ class Window(Adw.ApplicationWindow):
 		self.no_memes_status_page.set_paintable(ptbl)
 		self.last_progress_update_time = time.time()
 		self.overlay_sidebar.connect('notify::show-sidebar', self.on_preview_panel_switch)
+		self.clipboard = Gdk.Display.get_default().get_clipboard()
+
+		# TODO: Add keyboard shortcut to copy image to clipboard
+		# self.overlay_sidebar.connect('copy', self.on_image_copy)
+		# copy_action = Gio.ActionEntry()
+		# copy_action.name = 'copy'
+		# copy_action.activate = lambda: print('copy')
+		# self.add_action_entries(copy_action)
+		# self.add_accelerator(self.overlay_sidebar, "<Control>c", signal="copy")
 
 		self.init_model()
 
 		last_dir = settings.last_meme_directory
 		if last_dir and os.path.exists(last_dir):
 			self.load_memes(last_dir)
+
+	# def add_accelerator(self, widget, accelerator, signal="activate"):
+	# 	"""Adds a keyboard shortcut"""
+	# 	if accelerator is not None:
+	# 			#if DEBUG:
+	# 					#print accelerator, widget.get_tooltip_text()
+	# 			key, mod = Gtk.accelerator_parse(accelerator)
+	# 			widget.add_accelerator(signal, self.my_accelerators, key, mod, Gtk.AccelFlags.VISIBLE)
 
 	def init_model(self):
 		self.store = MemeStore()
@@ -87,14 +105,14 @@ class Window(Adw.ApplicationWindow):
 
 	def open_preview(self, selection: Gtk.SingleSelection, *_):
 		self.selected_item = selection.get_selected_item()
-		pic = Gdk.Texture.new_from_filename(self.selected_item.path)
-		self.overlay_picture.set_paintable(pic)
+		self.selected_item_pic = Gdk.Texture.new_from_filename(self.selected_item.path)
+		self.overlay_picture.set_paintable(self.selected_item_pic)
 		self.set_preview_info()
 		self.set_preview_tags()
 
+		height_request = self.selected_item_pic.get_height() * self.preview_width / self.selected_item_pic.get_width()
 		# FIXME: This is a workaround for getting scrollable image that's always 100% of parent width
 		# Maybe there's a better solution in GTK I haven't found yet
-		height_request = pic.get_height() * self.preview_width / pic.get_width()
 		self.overlay_picture.set_property('height-request', height_request)
 
 		self.overlay_sidebar.set_show_sidebar(True)
@@ -104,7 +122,8 @@ class Window(Adw.ApplicationWindow):
 		self.preview_info_filename.set_subtitle(self.selected_item.filename)
 		weight = self.selected_item.weight / 1024000
 		self.preview_info_weight.set_subtitle(f'{weight:.2f} MB')
-		width, height = self.selected_item.size
+		width = self.selected_item_pic.get_width()
+		height = self.selected_item_pic.get_height()
 		self.preview_info_size.set_subtitle(f'{width}px x {height}px')
 
 	def set_preview_tags(self):
@@ -226,3 +245,9 @@ class Window(Adw.ApplicationWindow):
 				pass
 
 		picker.select_folder(self, callback=set_selected_directory)
+
+	@Gtk.Template.Callback()
+	def on_image_copy(self, *_):
+		img_bytes = self.selected_item_pic.save_to_png_bytes()
+		content = Gdk.ContentProvider.new_for_bytes('image/png', img_bytes)
+		self.clipboard.set_content(content)

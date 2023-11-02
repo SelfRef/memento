@@ -194,6 +194,11 @@ template $Window : Adw.ApplicationWindow {
                       label: _("Tags");
                     }
                   }
+                  [end]
+                  Button preview_copy_button {
+                    icon-name: "edit-copy-symbolic";
+                    clicked => $on_image_copy();
+                  }
                 }
               };
             }
@@ -213,7 +218,6 @@ Popover main_menu_popover {
       valign: center;
     }
     Scale icon_size_scale {
-
       orientation: horizontal;
       digits: 0;
       round-digits: 0;

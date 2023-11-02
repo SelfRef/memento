@@ -261,6 +261,12 @@
                                         </child>
                                       </object>
                                     </child>
+                                    <child type="end">
+                                      <object class="GtkButton" id="preview_copy_button">
+                                        <property name="icon-name">edit-copy-symbolic</property>
+                                        <signal name="clicked" handler="on_image_copy"/>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
