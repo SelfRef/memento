@@ -32,4 +32,4 @@ This project is in development state, not for daily use yet.
 - Install requirements
 - Clone repo
 - Open VS Code workspace
-- Run debugger
+- Run debugger or default build task
