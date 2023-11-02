@@ -40,7 +40,13 @@
                   <object class="GtkMenuButton" id="button_menu">
                     <property name="icon-name">open-menu-symbolic</property>
                     <property name="primary">true</property>
-                    <property name="popover">main_menu_popover</property>
+                    <property name="menu-model">main_menu</property>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkMenuButton" id="settings_menu">
+                    <property name="icon-name">settings-app-symbolic</property>
+                    <property name="popover">settings_popover</property>
                   </object>
                 </child>
                 <child type="end">
@@ -86,7 +92,7 @@
                 <property name="name">loading</property>
                 <property name="child">
                   <object class="AdwStatusPage">
-                    <property name="title" translatable="true">Lold up, magic happens</property>
+                    <property name="title" translatable="true">Hold up, magic happens</property>
                     <property name="description" translatable="true">Just loorking around in you meme folder...</property>
                     <child>
                       <object class="AdwClamp">
@@ -284,11 +290,23 @@
       </object>
     </property>
   </template>
-  <object class="GtkPopover" id="main_menu_popover">
+  <menu id="main_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="true">About</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
+  <object class="GtkPopoverMenu" id="settings_popover">
     <property name="width-request">200</property>
     <property name="child">
       <object class="GtkBox">
         <property name="orientation">1</property>
+        <property name="margin-bottom">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
         <child>
           <object class="GtkLabel">
             <property name="label" translatable="true">Enlarge you meme</property>
@@ -320,5 +338,14 @@
         </child>
       </object>
     </property>
+  </object>
+  <object class="AdwAboutWindow" id="about_window">
+    <property name="application-name">Memento</property>
+    <property name="application-icon">dev.aperte.Memento</property>
+    <property name="version">dev</property>
+    <property name="developer-name">Krzysztof "SelfRef" Ferenc</property>
+    <property name="website">https://github.com/SelfRef/memento</property>
+    <property name="issue-url">https://github.com/SelfRef/memento/issues</property>
+    <property name="support-url">https://aperte.dev</property>
   </object>
 </interface>

@@ -13,6 +13,7 @@ from settings import Settings
 class Window(Adw.ApplicationWindow):
 	__gtype_name__ = "Window"
 
+	button_menu: Gtk.MenuButton = Gtk.Template.Child()
 	icon_size_scale: Gtk.Scale = Gtk.Template.Child()
 	miniatures_grid_view: Gtk.GridView = Gtk.Template.Child()
 	no_memes_status_page: Adw.StatusPage = Gtk.Template.Child()
@@ -36,6 +37,8 @@ class Window(Adw.ApplicationWindow):
 
 	search_entry: Gtk.SearchEntry = Gtk.Template.Child()
 	search_bar: Gtk.SearchBar = Gtk.Template.Child()
+
+	about_window: Adw.AboutWindow = Gtk.Template.Child()
 
 	def __init__(self, app: Adw.Application, settings: Settings):
 		super().__init__(
@@ -62,14 +65,16 @@ class Window(Adw.ApplicationWindow):
 		self.last_progress_update_time = time.time()
 		self.overlay_sidebar.connect('notify::show-sidebar', self.on_preview_panel_switch)
 		self.clipboard = Gdk.Display.get_default().get_clipboard()
+		self.about_window.set_transient_for(self)
 
-		# TODO: Add keyboard shortcut to copy image to clipboard
-		# self.overlay_sidebar.connect('copy', self.on_image_copy)
-		# copy_action = Gio.ActionEntry()
-		# copy_action.name = 'copy'
-		# copy_action.activate = lambda: print('copy')
-		# self.add_action_entries(copy_action)
-		# self.add_accelerator(self.overlay_sidebar, "<Control>c", signal="copy")
+		about_action = Gio.SimpleAction(name='about')
+		about_action.connect('activate', lambda *_: self.about_window.present())
+		app.add_action(about_action)
+
+		copy_action = Gio.SimpleAction(name='copy')
+		copy_action.connect('activate', self.on_image_copy)
+		app.add_action(about_action)
+		app.set_accels_for_action('app.copy', ['<Control>c'])
 
 		self.init_model()
 
@@ -248,6 +253,8 @@ class Window(Adw.ApplicationWindow):
 
 	@Gtk.Template.Callback()
 	def on_image_copy(self, *_):
+		if not self.selected_item_pic:
+			return
 		img_bytes = self.selected_item_pic.save_to_png_bytes()
 		content = Gdk.ContentProvider.new_for_bytes('image/png', img_bytes)
 		self.clipboard.set_content(content)
