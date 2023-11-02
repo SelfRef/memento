@@ -8,7 +8,7 @@ List | Preview
 ![list](assets/screenshots/grid.png) | ![preview](assets/screenshots/preview.png)
 
 ## Demo
-![demo](assets/screenshots/demo.webm)
+![demo](assets/screenshots/demo.webm.mp4)
 
 ## Features (incomplete)
 - Browse your meme folder recursively
