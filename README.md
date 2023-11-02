@@ -1,10 +1,25 @@
 # Memento
-(/məˈmɛntoʊ/)
+> /məˈmɛntoʊ/
 
-Meme gallery and auto-tagger
+Meme browser, search and tagger
 
-## Requirements
+List | Preview
+---|---
+![list](assets/screenshots/grid.png) | ![preview](assets/screenshots/preview.png)
 
+## Features (incomplete)
+- Browse your meme folder recursively
+- Cache generation (loads faster second time)
+- Preview panel with image details
+- Search function based on filename and tags
+- Build-in OCR tagging (allows to search for image text)
+
+## Status
+This project is in development state, not for daily use yet.
+
+## Setup
+
+### Requirements
 - GTK 4
 - libadwaita
 - Python 3
@@ -12,7 +27,7 @@ Meme gallery and auto-tagger
 - unidecode (PyPI, requred)
 - easyocr (PyPI, optional)
 
-## Setup
+### Run
 - Install requirements
 - Clone repo
 - Go to `src` directory
