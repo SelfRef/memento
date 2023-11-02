@@ -26,7 +26,7 @@ This project is in development state, not for daily use yet.
 - blueprint-compiler
 - pillow (PyPI, required)
 - unidecode (PyPI, requred)
-- easyocr (PyPI, optional)
+- easyocr (PyPI, optional for OCR feature)
 
 ### Run
 - Install requirements

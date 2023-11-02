@@ -1,16 +1,24 @@
 from threading import Thread
-import time
 from typing import Callable, List
 import os, json
+
 from unidecode import unidecode
 
 try:
 	import easyocr
-	reader = easyocr.Reader(['pl','en'], gpu=True) # this needs to run only once to load the model into memory
+	reader = easyocr.Reader(['pl','en'], gpu=True)
 except ModuleNotFoundError:
 	print('[W] EasyOCR not installed, OCR functionality will not be available')
 
+def is_ocr_available() -> bool:
+	"""Returns information if OCR feature is available"""
+	try:
+		return bool(reader)
+	except NameError:
+		return False
+
 def get_list_of_files(path: str, types: None | List[str] = None) -> List[str]:
+	"""Returns flat list of all image paths under specified path (including subdirectories)"""
 	file_paths = []
 	for root, dirs, files in os.walk(path):
 		dirs[:] = [d for d in dirs if not d.startswith('.')]
@@ -23,7 +31,11 @@ def get_list_of_files(path: str, types: None | List[str] = None) -> List[str]:
 					file_paths.append(file_path)
 	return file_paths
 
-# # TODO: Move to a class
+def scan_ocr_image(path: str, callback: Callable[[], List[str]]):
+	"""Runs OCR on image under specified path, then calls callback"""
+	Thread(target=_scan_ocr_thread, args=(path, callback)).start()
+
+# TODO: Move to separate service (API)
 def _scan_ocr_thread(path: str, callback: Callable[[], List[str]]):
 	print('[I] Start OCR process')
 	words = []
@@ -40,6 +52,3 @@ def _scan_ocr_thread(path: str, callback: Callable[[], List[str]]):
 			json.dump({'tags': words}, file)
 	except IOError as e:
 		print(f'[E] Failed to save cache file: "{meta_path}"', e.strerror)
-
-def scan_ocr_image(path: str, callback: Callable[[], List[str]]):
-	Thread(target=_scan_ocr_thread, args=(path, callback)).start()

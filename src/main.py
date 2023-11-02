@@ -1,8 +1,11 @@
-import gi, sys
-from settings import Settings
+import sys
+
+import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw
+
+from settings import Settings
 from window import Window
 
 settings = Settings()

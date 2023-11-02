@@ -16,7 +16,7 @@ template $Window : Adw.ApplicationWindow {
 
       Adw.HeaderBar {
         Button {
-          clicked => $select_directory();
+          clicked => $on_select_directory();
           Adw.ButtonContent {
             icon-name: "folder-symbolic";
             label: _("Open");
@@ -202,7 +202,7 @@ template $Window : Adw.ApplicationWindow {
                   [end]
                   Button preview_copy_button {
                     icon-name: "edit-copy-symbolic";
-                    clicked => $on_image_copy();
+                    clicked => $on_copy_image();
                   }
                 }
               };
@@ -244,7 +244,7 @@ PopoverMenu settings_popover {
         upper: 5;
         value: 3;
       };
-      change-value => $change_icon_size();
+      change-value => $on_change_icon_size();
       sensitive: false;
       marks [
         mark(1, bottom, _("smol")),
@@ -255,15 +255,4 @@ PopoverMenu settings_popover {
       ]
     }
   };
-}
-
-Adw.AboutWindow about_window {
-  application-name: "Memento";
-  application-icon: "dev.aperte.Memento";
-  version: "dev";
-  developer-name: "Krzysztof \"SelfRef\" Ferenc";
-  website: "https://github.com/SelfRef/memento";
-  issue-url: "https://github.com/SelfRef/memento/issues";
-  support-url: "https://aperte.dev";
-
 }

@@ -13,13 +13,13 @@
 				"command": "blueprint-compiler",
 				"type": "shell",
 				"options": {
-					"cwd": "src/ui"
+					"cwd": "src"
 				},
 				"args": [
-					"compile",
-					"--output",
-					"main.ui",
-					"main.blp"
+					"batch-compile",
+					"ui",
+					"ui",
+					"ui/*.blp"
 				],
 				"presentation": {
 					"reveal": "always"
@@ -27,10 +27,26 @@
 				"group": "build"
 			},
 			{
-				"label": "Run main",
+				"label": "Run main (venv)",
 				"group": {
 					"kind": "build",
 					"isDefault": true
+				},
+				"type": "shell",
+				"options": {
+					"cwd": "src"
+				},
+				"command": "../.venv/bin/python",
+				"args": [
+					"main.py"
+				],
+				"dependsOn": "Compile UI"
+			},
+			{
+				"label": "Run main (global python)",
+				"group": {
+					"kind": "build",
+					"isDefault": false
 				},
 				"type": "shell",
 				"options": {

@@ -3,6 +3,7 @@ from os import path
 
 # TODO: This implementation is temporary, will be replaced with GtkSettings
 class Settings():
+	"""Settings manager for reading and saving application settings to JSON file"""
 	def __init__(self) -> None:
 		self._dir_path = path.split(__file__)[0]
 		self._file_name = 'settings.json'
@@ -10,11 +11,17 @@ class Settings():
 		self._load()
 
 	@property
-	def last_meme_directory(self):
-		return self._all_settings.get('last_meme_directory', None)
+	def last_meme_directory(self) -> bool:
+		"""Returns last opened directory if still exists"""
+		last_dir = self._all_settings.get('last_meme_directory', None)
+		if path.isdir(last_dir):
+			return last_dir
+		else:
+			return False
 
 	@last_meme_directory.setter
 	def last_meme_directory(self, value: str | None):
+		"""Sets last opened directory"""
 		self._all_settings['last_meme_directory'] = value
 		self._save()
 
