@@ -23,6 +23,7 @@ This project is in development state, not for daily use yet.
 - GTK 4
 - libadwaita
 - Python 3
+- blueprint-compiler
 - pillow (PyPI, required)
 - unidecode (PyPI, requred)
 - easyocr (PyPI, optional)
@@ -30,5 +31,5 @@ This project is in development state, not for daily use yet.
 ### Run
 - Install requirements
 - Clone repo
-- Go to `src` directory
-- Run `python main.py`
+- Open VS Code workspace
+- Run debugger

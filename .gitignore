@@ -4,3 +4,4 @@ __pycache__/
 assets/example-memes
 src/test.py
 settings.json
+src/ui/*.ui
