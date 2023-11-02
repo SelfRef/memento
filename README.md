@@ -7,6 +7,9 @@ List | Preview
 ---|---
 ![list](assets/screenshots/grid.png) | ![preview](assets/screenshots/preview.png)
 
+## Demo
+![demo](assets/screenshots/demo.webm)
+
 ## Features (incomplete)
 - Browse your meme folder recursively
 - Cache generation (loads faster second time)
