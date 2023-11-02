@@ -18,7 +18,7 @@ List | Preview
 - Preview panel with image details
 - Search function based on filename and tags
 - Build-in OCR tagging (allows to search for image text)
-- More to come: [planned features](https://github.com/SelfRef/memento/labels/enhancement)
+- More to come: [planned features](https://github.com/SelfRef/memento/labels/enhancement), [project roadmap](https://github.com/users/SelfRef/projects/4)
 
 ## Status
 This project is in development state, not for daily use yet.
