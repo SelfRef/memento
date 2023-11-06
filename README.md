@@ -4,7 +4,7 @@
 Meme browser, search and tagger
 
 ## Demo
-[demo.webm](https://github.com/SelfRef/memento/assets/69125050/2e6b779f-91ea-4a8d-8982-8dbe896568ea)
+https://github.com/SelfRef/memento/assets/69125050/c1f41c03-7060-4929-8a4e-13588ca22c91
 
 ## Screenshots
 List | Preview
