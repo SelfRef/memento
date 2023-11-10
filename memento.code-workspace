@@ -57,6 +57,20 @@
 					"main.py"
 				],
 				"dependsOn": "Compile UI"
+			},
+			{
+				"label": "Create virtual environment",
+				"group": {
+					"kind": "build",
+					"isDefault": false
+				},
+				"type": "shell",
+				"command": "python",
+				"args": [
+					"-m",
+					"venv",
+					".venv"
+				]
 			}
 		]
 	}
