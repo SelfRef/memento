@@ -1,7 +1,7 @@
 # Memento
 > /məˈmɛntoʊ/
 
-Meme browser, search and tagger
+Meme browser, search and tagger (very WIP)
 
 ## Demo
 https://github.com/SelfRef/memento/assets/69125050/c1f41c03-7060-4929-8a4e-13588ca22c91
